@@ -10,8 +10,10 @@ SoftwareSerial canal_bluetooth(2,3); //Pin 2 Rx, pin 3 Tx
 // DS18B20 en PIN 6 Digital
 #define ONE_WIRE_BUS 6
 
-//Relé de Estado Sólido en PIN 3 Digital (PWM)
+//Relé de Estado Sólido en PIN 4 Digital 
 #define RELAY_PIN 4
+#define mixerDerecho 5
+#define mixerIzquierdo 7
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
@@ -92,10 +94,27 @@ int C30 = 0;
 DeviceAddress sensor1 = {0x28, 0xFF, 0x31, 0x26, 0xA2, 0x17, 0x05, 0x7C};
 DeviceAddress sensor2 = {0x28, 0xFF, 0x5F, 0x26, 0xA2, 0x17, 0x05, 0xCF};
 
+// Función mixer 
+void mixerFunction() {
+  digitalWrite(mixerDerecho,LOW);
+  delay(5000);
+  digitalWrite(mixerDerecho,HIGH);
+  delay(250);
+  digitalWrite(mixerIzquierdo,LOW);
+  delay(250);
+  digitalWrite(mixerIzquierdo,HIGH);
+  
+  return 0;
+}
+
 void setup() {
   Serial.begin(9600);
   canal_bluetooth.begin(9600); 
   pinMode(RELAY_PIN, OUTPUT);
+  pinMode(mixerDerecho,OUTPUT);
+  pinMode(mixerIzquierdo,OUTPUT);
+  digitalWrite(mixerDerecho,HIGH); // Inicializa el relé del mixer(giro derecho) en estado bajo
+  digitalWrite(mixerIzquierdo,HIGH); // Inicializa el relé del mixer(giro izquierdo) en estado bajo
   //digitalWrite(RELAY_PIN, LOW);
   tiempo_restante = timer_2 - timer_1;
   //Establecemos resolución de sensores
@@ -213,7 +232,7 @@ do{
   m = sensors.getTempC(sensor1);
   ref_tiempo = tiempo_1;                               // Variable para guardar el valor del tiempo seteado en la interfaz y sirve para calcular e imprimir el tiempo restante en el bloque final del programa  
      
-      if( m < sp1-4 && C1==1) {                        // C1 compara si el ultimo registro de tiempo es menor a sp1-2 
+      if( m < sp1-3 && C1==1) {                        // C1 compara si el ultimo registro de tiempo es menor a sp1-3
         Serial.print("Temperatura: ");
         Serial.println(m,4);                             // Ultimo registro de temperatura leido 'm'
         digitalWrite(RELAY_PIN, HIGH);
@@ -225,7 +244,7 @@ do{
   C6=0;
         //delay(1000);
       }
-      else if( m >= sp1-4 && m < sp1 && C2 ==1) {     // C2 compara si el ultimo registro de tiempo es mayor igual a sp1-2 y menor a sp1 y si existe flanco de subida
+      else if( m >= sp1-2.5 && m < sp1 && C2 ==1) {     // C2 compara si el ultimo registro de tiempo es mayor igual a sp1-2.5 y menor a sp1 y si existe flanco de subida
         Serial.print("Temperatura: ");
         Serial.println(m,4);                             // Ultimo registro de temperatura leido 'm'
         digitalWrite(RELAY_PIN, LOW);
@@ -319,9 +338,10 @@ do{
   ref_tiempo = tiempo_2;
   
   Serial.println("CICLO DE TIEMPO 2");
-  if(m < sp2-4 && C7==1) {
+  if(m < sp2-3 && C7==1) {
     timer_4 = millis();
     timer_3 = millis();
+    mixerFunction();                  // Mezclar el mosto
     Serial.print("Temperatura: ");
     Serial.println(m);                             // Ultimo registro de temperatura leido 'm'
     digitalWrite(RELAY_PIN, HIGH);
@@ -333,7 +353,7 @@ do{
   C12=0;
   //delay(1000);
    }
-  else if( m >= sp2-4 && m < sp2 && C8 ==1) {     // C2 compara si el ultimo registro de tiempo es mayor igual a sp1-2 y menor a sp1 y si existe flanco de subida
+  else if( m >= sp2-3 && m < sp2 && C8 ==1) {     // C2 compara si el ultimo registro de tiempo es mayor igual a sp1-2 y menor a sp1 y si existe flanco de subida
      Serial.print("Temperatura: ");
      Serial.println(m);                             // Ultimo registro de temperatura leido 'm'
      digitalWrite(RELAY_PIN, LOW);
