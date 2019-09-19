@@ -296,7 +296,7 @@ do{
   C6=1;
        // delay(1000);
       }
-      else if( m <= sp1 && m > sp1-1 && C6==1){  // C6 compara si el ultimo registro de tiempo es menor igual a sp1-1, mayor igual a sp1-2 y si existe flanco bajada
+      else if( m <= sp1 && m >= sp1-1 && C6==1){  // C6 compara si el ultimo registro de tiempo es menor igual a sp1-1, mayor igual a sp1-2 y si existe flanco bajada
         Serial.print("Temperatura: ");
         Serial.println(m);
         digitalWrite(RELAY_PIN, LOW);
@@ -353,7 +353,7 @@ do{
   C12=0;
   //delay(1000);
    }
-  else if( m >= sp2-3 && m < sp2 && C8 ==1) {     // C2 compara si el ultimo registro de tiempo es mayor igual a sp1-2 y menor a sp1 y si existe flanco de subida
+  else if( m >= sp2-2.5 && m < sp2 && C8 ==1) {     // C2 compara si el ultimo registro de tiempo es mayor igual a sp1-2 y menor a sp1 y si existe flanco de subida
      Serial.print("Temperatura: ");
      Serial.println(m);                             // Ultimo registro de temperatura leido 'm'
      digitalWrite(RELAY_PIN, LOW);
@@ -406,7 +406,7 @@ do{
   C12=1;
    //delay(1000);
   }
-  else if( m <= sp2 && m > sp2-1 && C12==1){  // C6 compara si el ultimo registro de tiempo es menor igual a sp1-1, mayor igual a sp1-2 y si existe flanco bajada
+  else if( m <= sp2 && m >= sp2-1 && C12==1){  // C6 compara si el ultimo registro de tiempo es menor igual a sp1-1, mayor igual a sp1-2 y si existe flanco bajada
     timer_3 = millis();
     Serial.print("Temperatura: ");
     Serial.println(m);
@@ -442,7 +442,8 @@ do{
   ref_tiempo = tiempo_3;
   
   Serial.println("CICLO DE TIEMPO 3");
-  if(m < sp3-4 && C13==1) {
+  if(m < sp3-3 && C13==1) {
+    mixerFunction();
     timer_6 = millis();
     timer_5 = millis();
     Serial.print("Temperatura: ");
@@ -456,7 +457,7 @@ do{
   C18=0;
   //delay(1000);
    }
-  else if( m >= sp3-4 && m < sp3 && C14 ==1) {     // C2 compara si el ultimo registro de tiempo es mayor igual a sp1-2 y menor a sp1 y si existe flanco de subida
+  else if( m >= sp3-2.5 && m < sp3 && C14 ==1) {     // C2 compara si el ultimo registro de tiempo es mayor igual a sp1-2 y menor a sp1 y si existe flanco de subida
      Serial.print("Temperatura: ");
      Serial.println(m);                             // Ultimo registro de temperatura leido 'm'
      digitalWrite(RELAY_PIN, LOW);
@@ -509,7 +510,7 @@ do{
   C18=1;
    //delay(1000);
   }
-  else if( m <= sp3 && m > sp3-1 && C18==1){  // C6 compara si el ultimo registro de tiempo es menor igual a sp1-1, mayor igual a sp1-2 y si existe flanco bajada
+  else if( m <= sp3 && m >= sp3-1 && C18==1){  // C6 compara si el ultimo registro de tiempo es menor igual a sp1-1, mayor igual a sp1-2 y si existe flanco bajada
    // timer_3 = millis();
     Serial.print("Temperatura: ");
     Serial.println(m);
