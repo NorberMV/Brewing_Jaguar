@@ -37,8 +37,11 @@ unsigned long tiempo_3 = 0;
 unsigned long tiempo_4 = 0;
 unsigned long tiempo_5 = 0;
 double tiempo_restante;
+double refTiempo;
 double ref_tiempo;
+float diferenciaTiempo;
 double m;
+double tempData;
 int bandera = 1;
 int bandera1 = 0;
 int bandera2 = 0;
@@ -106,6 +109,108 @@ void mixerFunction() {
   
   return 0;
 }
+// Brewing function
+
+float brewingFunction( int sp, double refTiempo) {
+  sensors.requestTemperatures();
+  tempData = sensors.getTempC(sensor1);
+     
+     
+      if( m < sp-3 && C1==1) {                        // C1 compara si el ultimo registro de tiempo es menor a sp1-3
+        Serial.print("Temperatura: ");
+        Serial.println(m,4);                             // Ultimo registro de temperatura leido 'm'
+        digitalWrite(RELAY_PIN, HIGH);
+        Serial.println("Ejecuto C1");
+  C2=1;
+  C3=0;
+  C4=0;
+  C5=0;
+  C6=0;
+        //delay(1000);
+      }
+      else if( m >= sp-2.5 && m < sp && C2 ==1) {     // C2 compara si el ultimo registro de tiempo es mayor igual a sp1-2.5 y menor a sp1 y si existe flanco de subida
+        Serial.print("Temperatura: ");
+        Serial.println(m,4);                             // Ultimo registro de temperatura leido 'm'
+        digitalWrite(RELAY_PIN, LOW);
+        //timer_2 = millis();                           //Referencia de tiempo
+        Serial.println("Ejecuto C2");
+  C1=0;
+  C3=1;
+  C4=0;
+  C5=0;
+  C6=0;
+        //delay(1000);
+      }
+      else if( m >= sp && C3==1 && contador ==0) {  // C3 Si el ultimo registro de temperatura m es mayor o igual al setpoint_1, si existe flanco de subida y guarda el valor de  timer_1 para temporizar
+        digitalWrite(RELAY_PIN, LOW);               
+        timer_1 = millis();                            // Referencia tiempo inicial para temporizar
+        contador++;                                    // Contador para que solo cumpla la condicion la primer vez que alcance el setpoint
+        Serial.print("ALCANZO SET_POINT1_Temperatura: ");
+        Serial.println(m,4);                                   
+        Serial.println("Ejecuto C3");
+  C1=0;
+  C2=0;
+  C4=1;
+  C5=0;
+  C6=0;
+        //delay(1000);
+      }
+      else if( m >= sp && contador != 0 && C4==1){            // C4 compara Si el ultimo registro de temperatura m es mayor o igual al setpoint_1 y si contador es diferente de cero
+        Serial.print("Temperatura: ");
+        Serial.println(m,4);
+        digitalWrite(RELAY_PIN, LOW);
+        //timer_2 = millis();                           //Referencia de tiempo 
+        Serial.println("Ejecuto C4");
+  C1=0;
+  C2=0;
+  C3=0;
+  C5=1;
+  C6=0;
+        //delay(1000);
+      }
+      else if( m < sp && m < sp-2 && C5==1){      // C5 compara si el ultimo registro de tiempo es menor igual a sp1 y mayor que sp1-1 y si existe flanco bajada
+        Serial.print("Temperatura: ");
+        Serial.println(m);
+        digitalWrite(RELAY_PIN, HIGH);
+        Serial.println("Ejecuto C5");
+  C1=0;
+  C2=0;
+  C3=0;
+  C4=0;
+  C6=1;
+       // delay(1000);
+      }
+      else if( m <= sp && m >= sp-1 && C6==1){  // C6 compara si el ultimo registro de tiempo es menor igual a sp1-1, mayor igual a sp1-2 y si existe flanco bajada
+        Serial.print("Temperatura: ");
+        Serial.println(m);
+        digitalWrite(RELAY_PIN, LOW);
+        //timer_2 = millis();                           //Referencia de tiempo 
+        Serial.println("Ejecuto C6");
+  C1=0;
+  C2=0;
+  C3=0;
+  C4=0;
+  C5=1;
+        //delay(1000);
+      }
+
+      // Bloque final
+      timer_2 = millis();                                // Actualiza tiempo de ciclo 1, desde que el programa se encuentra ejecutandose en milisegundos
+      float diferenciaTiempo = timer_2 - timer_1;       //Actualiza la diferencia de tiempo en la variable de tiempo local
+      tiempo_restante = refTiempo - diferenciaTiempo; // Tiempo restante en milisegundos
+     
+      // Imprimir tiempo restante de ciclo
+      Serial.print("Tiempo restante: ");
+      Serial.print((tiempo_restante/60000));            
+      Serial.println("minutos ");
+      // enviar datos por bluetooth a interfaz de Matlab
+      canal_bluetooth.print(m,4);
+      canal_bluetooth.print(" ");
+      canal_bluetooth.println(((tiempo_restante)/60000),4);
+      delay(500);
+  return diferenciaTiempo;
+} // Fin brewingFunction(); 
+
 
 void setup() {
   Serial.begin(9600);
@@ -130,10 +235,8 @@ void setup() {
   sensors.setResolution(sensor1, 12);
   sensors.setResolution(sensor2, 12);
   //digitalWrite(RELAY_PIN, HIGH);
-}
-
-void loop() {
-// Sincronizando transmisión serial con interfaz Matlab
+  
+  // Sincronizando transmisión serial con interfaz Matlab
   if(bandera) {
     do{
       if(canal_bluetooth.available()>0) {
@@ -223,109 +326,18 @@ void loop() {
  Serial.print("sp5: ");
  Serial.println(sp5);
  delay(1000);
+  
+}
+
+void loop() {
 
  // ***********************************************INICIO PRIMER CICLO DE TIEMPO*************************************************************************************************************************
 
 
 do{
-  sensors.requestTemperatures();
-  m = sensors.getTempC(sensor1);
-  ref_tiempo = tiempo_1;                               // Variable para guardar el valor del tiempo seteado en la interfaz y sirve para calcular e imprimir el tiempo restante en el bloque final del programa  
-     
-      if( m < sp1-3 && C1==1) {                        // C1 compara si el ultimo registro de tiempo es menor a sp1-3
-        Serial.print("Temperatura: ");
-        Serial.println(m,4);                             // Ultimo registro de temperatura leido 'm'
-        digitalWrite(RELAY_PIN, HIGH);
-        Serial.println("Ejecuto C1");
-  C2=1;
-  C3=0;
-  C4=0;
-  C5=0;
-  C6=0;
-        //delay(1000);
-      }
-      else if( m >= sp1-2.5 && m < sp1 && C2 ==1) {     // C2 compara si el ultimo registro de tiempo es mayor igual a sp1-2.5 y menor a sp1 y si existe flanco de subida
-        Serial.print("Temperatura: ");
-        Serial.println(m,4);                             // Ultimo registro de temperatura leido 'm'
-        digitalWrite(RELAY_PIN, LOW);
-        //timer_2 = millis();                           //Referencia de tiempo
-        Serial.println("Ejecuto C2");
-  C1=0;
-  C3=1;
-  C4=0;
-  C5=0;
-  C6=0;
-        //delay(1000);
-      }
-      else if( m >= sp1 && C3==1 && contador ==0) {  // C3 Si el ultimo registro de temperatura m es mayor o igual al setpoint_1, si existe flanco de subida y guarda el valor de  timer_1 para temporizar
-        digitalWrite(RELAY_PIN, LOW);               
-        timer_1 = millis();                            // Referencia tiempo inicial para temporizar
-        contador++;                                    // Contador para que solo cumpla la condicion la primer vez que alcance el setpoint
-        Serial.print("ALCANZO SET_POINT1_Temperatura: ");
-        Serial.println(m,4);                                   
-        Serial.println("Ejecuto C3");
-  C1=0;
-  C2=0;
-  C4=1;
-  C5=0;
-  C6=0;
-        //delay(1000);
-      }
-      else if( m >= sp1 && contador != 0 && C4==1){            // C4 compara Si el ultimo registro de temperatura m es mayor o igual al setpoint_1 y si contador es diferente de cero
-        Serial.print("Temperatura: ");
-        Serial.println(m,4);
-        digitalWrite(RELAY_PIN, LOW);
-        //timer_2 = millis();                           //Referencia de tiempo 
-        Serial.println("Ejecuto C4");
-  C1=0;
-  C2=0;
-  C3=0;
-  C5=1;
-  C6=0;
-        //delay(1000);
-      }
-      else if( m < sp1 && m < sp1-2 && C5==1){      // C5 compara si el ultimo registro de tiempo es menor igual a sp1 y mayor que sp1-1 y si existe flanco bajada
-        Serial.print("Temperatura: ");
-        Serial.println(m);
-        digitalWrite(RELAY_PIN, HIGH);
-        Serial.println("Ejecuto C5");
-  C1=0;
-  C2=0;
-  C3=0;
-  C4=0;
-  C6=1;
-       // delay(1000);
-      }
-      else if( m <= sp1 && m >= sp1-1 && C6==1){  // C6 compara si el ultimo registro de tiempo es menor igual a sp1-1, mayor igual a sp1-2 y si existe flanco bajada
-        Serial.print("Temperatura: ");
-        Serial.println(m);
-        digitalWrite(RELAY_PIN, LOW);
-        //timer_2 = millis();                           //Referencia de tiempo 
-        Serial.println("Ejecuto C6");
-  C1=0;
-  C2=0;
-  C3=0;
-  C4=0;
-  C5=1;
-        //delay(1000);
-      }
-
-      // Bloque final
-      timer_2 = millis();                                // Actualiza tiempo de ciclo 1, desde que el programa se encuentra ejecutandose en milisegundos
-      float diferencia_tiempo = timer_2 - timer_1;       //Actualiza la diferencia de tiempo en la variable de tiempo local
-      tiempo_restante = ref_tiempo - diferencia_tiempo; // Tiempo restante en milisegundos
-     
-      // Imprimir tiempo restante de ciclo
-      Serial.print("Tiempo restante: ");
-      Serial.print((tiempo_restante/60000));            
-      Serial.println("minutos ");
-      // enviar datos por bluetooth a interfaz de Matlab
-      canal_bluetooth.print(m,4);
-      canal_bluetooth.print(" ");
-      canal_bluetooth.println(((tiempo_restante)/60000),4);
-      delay(500);
-      
-}while(timer_2-timer_1 <= tiempo_1);
+  diferenciaTiempo = brewingFunction( sp1,tiempo_1);
+       
+}while(diferenciaTiempo <= tiempo_1);
 
 
 // ***********************************************FIN PRIMERA CICLO DE TIEMPO*************************************************************************************************************************
@@ -785,7 +797,7 @@ do{
 
  // ***********************************************INICIO CICLO DE LUPULADO*************************************************************************************************************************
 
-
+/*
 do{
   Serial.println("************************************INICIO CICLO DE LUPULADO*****************************************************");
   sensors.requestTemperatures();
@@ -825,7 +837,7 @@ do{
       // Bloque final
       timer_2 = millis();                                // Actualiza tiempo de ciclo 1, desde que el programa se encuentra ejecutandose en milisegundos
       float diferencia_tiempo = timer_2 - timer_1;       //Actualiza la diferencia de tiempo en la variable de tiempo local
-      tiempo_restante = ref_tiempo - diferencia_tiempo; // Tiempo restante en milisegundos
+      tiempo_restante = ref_tiempo - diferencia_tiempo;  // Tiempo restante en milisegundos
      
       // Imprimir tiempo restante de ciclo
       Serial.print("Tiempo restante: ");
@@ -837,8 +849,7 @@ do{
       canal_bluetooth.println(((tiempo_restante)/60000),4);
       delay(500);
       
-}while(timer_2-timer_1 <= ref_tiempo);
+}while(timer_2-timer_1 <= ref_tiempo); */
 
 }
 // ***********************************************FINAL DE PRODUCCIÓN*************************************************************************************************************************
-
