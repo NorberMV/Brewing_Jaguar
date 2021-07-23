@@ -3,8 +3,6 @@
 <h1>Todos los archivos de control del sistema de producción de la pola jaguar.</h1>
 
 <img src="https://github.com/NorberMV/Brewing_Jaguar/blob/master/beer_1.jpg" width="300">
-# Retrieving and Dysplaying Temperature Data from a Brew Process using the API from thingspeaks + ESP8266 module and two DS18B20 sensors.
-
 
 ## Table of contents
 * [General info](#general-info)
