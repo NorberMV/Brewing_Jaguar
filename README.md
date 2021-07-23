@@ -26,11 +26,3 @@ Project is created with:
 
 <img src="https://github.com/NorberMV/Brewing_Jaguar/blob/master/beerSys.gif" width="500">
 
-
-<img src="https://github.com/NorberMV/BrewthingspeakESP8266/blob/master/temperatureData1.jpg" width="500">
-
-
-<img src="https://github.com/NorberMV/BrewthingspeakESP8266/blob/master/temperatureData1.jpg" width="500">
-
-
-<img src="https://github.com/NorberMV/BrewthingspeakESP8266/blob/master/temperatureData1.jpg" width="500">
