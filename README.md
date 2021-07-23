@@ -15,7 +15,7 @@ The data is being sended via bluetooth from the bluetooth module and it´s recei
 APP.
 
 	
-## Technologies
+## Requirements
 Project is created with:
 * 1 HC-05 Bluetooth Module
 * 2 DS18B20 digital temperature sensors with a Inox 304 Stainless Steel probe
